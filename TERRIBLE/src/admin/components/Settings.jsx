@@ -284,7 +284,7 @@ export default function Settings() {
           />
           <SettingToggle
             icon={Skull}
-            title="Skulpt Button"
+            title="To Be Added"
             description="Doesn't do anything"
             enabled={settings.captchaEnabled}
             onToggle={() => handleToggle('captchaEnabled')}
