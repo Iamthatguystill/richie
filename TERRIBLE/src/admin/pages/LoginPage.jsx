@@ -79,7 +79,7 @@ const LoginPage = () => {
                   <Flame className="w-8 h-8 text-orange-500 animate-pulse" />
                 </div>
                 <h2 className="text-2xl font-bold text-white mb-2 font-mono tracking-wider">
-                  TERRIBLE PANEL
+                  METH PANEL
                 </h2>
                 <p className="text-zinc-400 font-mono text-sm">
                   ENTER ACCESS KEY TO PROCEED
